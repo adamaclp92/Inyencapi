@@ -1,0 +1,203 @@
+openapi: 3.0.3
+info:
+  title: Inyenc API
+  description: Rendelo alkalmazas API
+  version: 1.0.0
+servers:
+  - url: hostname:8082
+paths:
+  /api/orders:
+    post:
+      summary: Post new order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostNewOrder_RequestBody'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/PostNewOrder_RequestBody'
+      responses:
+        '200':
+          description: New Order sucessfully sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostNewOrder_ResponseBody'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/PostNewOrder_ResponseBody'
+        '400':
+          description: Mandatory request element is missing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '500':
+          description: Other error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/orders/{order_id}:
+    get:
+      summary: Get order by order_id
+      parameters:
+        - in: path
+          name: order_id
+          schema:
+            type: string
+          required: true
+          description: Uuid of order_id
+      responses:
+        '200':
+          description: Successfully get the order attributes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetOrderByOrderId_ResponseBody'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/GetOrderByOrderId_ResponseBody'
+        '404':
+          description: There is no order with the given order_id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Other error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    PostNewOrder_RequestBody:
+      type: object
+      required:
+        - customer_datas
+        - customer_address
+        - meal_items
+      properties:
+        customer_datas:
+          $ref: '#/components/schemas/Customer'
+        customer_address:
+          $ref: '#/components/schemas/Address'
+        meal_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealQuantity'
+          minItems: 1
+    PostNewOrder_ResponseBody:
+      type: object
+      required:
+        - status
+        - order_id
+      properties:
+        status:
+          type: string
+        order_id:
+          type: string
+    GetOrderByOrderId_ResponseBody:
+      type: object
+      required:
+        - customer_datas
+        - address_datas
+        - order_id
+        - meal_items
+      properties:
+        customer_datas:
+          $ref: '#/components/schemas/Customer'
+        address_datas:
+          $ref: '#/components/schemas/Address'
+        order_datas:
+          $ref: '#/components/schemas/Order'
+        meal_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealQuantity'
+          minItems: 1
+    Order:
+      type: object
+      required:
+        - order_id
+        - order_date
+        - order_status
+      properties:
+        order_id:
+          type: string
+        order_date:
+          type: string
+          format: date-time
+        order_status:
+          type: string
+          enum:
+            - Feldolgozas_alatt
+            - Kiszallitas_alatt
+            - Teljesitve
+    MealQuantity:
+      type: object
+      properties:
+        meal_id:
+          type: string
+        meal_quantity:
+          type: integer
+    Customer:
+      required:
+        - customer_name
+        - customer_phone_number
+        - customer_email
+      type: object
+      properties:
+        customer_name:
+          type: string
+        customer_phone_number:
+          type: string
+        customer_email:
+          type: string
+    Address:
+      required:
+        - address_zip_code
+        - address_city
+        - address_street_number
+      type: object
+      properties:
+        address_zip_code:
+          type: integer
+        address_city:
+          type: string
+        address_street_number:
+          type: string
+    ErrorResponse:
+      required:
+        - error_code
+        - error_message
+        - timestamp
+      type: object
+      properties:
+        error_code:
+          type: string
+        error_message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
