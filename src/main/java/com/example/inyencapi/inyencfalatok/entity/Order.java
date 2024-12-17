@@ -18,9 +18,6 @@ import lombok.ToString;
 
 @Entity
 @Table(name = "orders")
-@Getter
-@Setter
-@ToString
 public class Order implements Serializable{
 
     @Id
@@ -46,5 +43,63 @@ public class Order implements Serializable{
     public enum OrderStatus {
     	Feldolgozas_alatt, Kiszallitas_alatt, Teljesitve
     }
-	
-	}
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    public UUID getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(UUID orderId) {
+        this.orderId = orderId;
+    }
+
+    public Timestamp getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(Timestamp orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    public OrderStatus getOrderStatus() {
+        return orderStatus;
+    }
+
+    public void setOrderStatus(OrderStatus orderStatus) {
+        this.orderStatus = orderStatus;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public List<OrderItem> getOrderItems() {
+        return orderItems;
+    }
+
+    public void setOrderItems(List<OrderItem> orderItems) {
+        this.orderItems = orderItems;
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "orderId=" + orderId +
+                ", orderDate=" + orderDate +
+                ", orderStatus=" + orderStatus +
+                ", customer=" + customer +
+                ", orderItems=" + orderItems +
+                '}';
+    }
+}
+
+
+

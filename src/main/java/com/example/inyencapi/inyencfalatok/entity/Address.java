@@ -20,9 +20,6 @@ import lombok.ToString;
 
 @Entity
 @Table(name="addresses")
-@Getter
-@Setter
-@ToString
 public class Address implements Serializable {
 
     @Id
@@ -55,7 +52,54 @@ public class Address implements Serializable {
 	}
 
 
-    
+    public UUID getId() {
+        return id;
+    }
 
-    
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public int getZipCode() {
+        return zipCode;
+    }
+
+    public void setZipCode(int zipCode) {
+        this.zipCode = zipCode;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getStreetNumber() {
+        return streetNumber;
+    }
+
+    public void setStreetNumber(String streetNumber) {
+        this.streetNumber = streetNumber;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "id=" + id +
+                ", zipCode=" + zipCode +
+                ", city='" + city + '\'' +
+                ", streetNumber='" + streetNumber + '\'' +
+                ", customer=" + customer +
+                '}';
+    }
 }

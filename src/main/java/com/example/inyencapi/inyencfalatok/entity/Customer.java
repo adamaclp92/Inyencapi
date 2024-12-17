@@ -24,9 +24,6 @@ import lombok.ToString;
 
 @Entity
 @Table(name="customers")
-@Getter
-@Setter
-@ToString
 public class Customer implements Serializable {
 
 	  	@Id
@@ -69,5 +66,63 @@ public class Customer implements Serializable {
 		}
 
 
+	public UUID getId() {
+		return id;
+	}
 
+	public void setId(UUID id) {
+		this.id = id;
+	}
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
+
+	public String getCustomerPhoneNumber() {
+		return customerPhoneNumber;
+	}
+
+	public void setCustomerPhoneNumber(String customerPhoneNumber) {
+		this.customerPhoneNumber = customerPhoneNumber;
+	}
+
+	public Address getAddress() {
+		return address;
+	}
+
+	public void setAddress(Address address) {
+		this.address = address;
+	}
+
+	public String getCustomerEmail() {
+		return customerEmail;
+	}
+
+	public void setCustomerEmail(String customerEmail) {
+		this.customerEmail = customerEmail;
+	}
+
+	public List<Order> getOrders() {
+		return orders;
+	}
+
+	public void setOrders(List<Order> orders) {
+		this.orders = orders;
+	}
+
+	@Override
+	public String toString() {
+		return "Customer{" +
+				"id=" + id +
+				", customerName='" + customerName + '\'' +
+				", customerPhoneNumber='" + customerPhoneNumber + '\'' +
+				", address=" + address +
+				", customerEmail='" + customerEmail + '\'' +
+				", orders=" + orders +
+				'}';
+	}
 }

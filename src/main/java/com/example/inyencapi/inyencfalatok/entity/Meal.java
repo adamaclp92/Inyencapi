@@ -16,9 +16,6 @@ import lombok.ToString;
 
 @Entity
 @Table(name = "meals")
-@Getter
-@Setter
-@ToString
 public class Meal implements Serializable{
 
     @Id
@@ -46,4 +43,64 @@ public class Meal implements Serializable{
     	elerheto, kifogyott
     }
 
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getMealName() {
+        return mealName;
+    }
+
+    public void setMealName(String mealName) {
+        this.mealName = mealName;
+    }
+
+    public String getMealDescription() {
+        return mealDescription;
+    }
+
+    public void setMealDescription(String mealDescription) {
+        this.mealDescription = mealDescription;
+    }
+
+    public int getMealPrice() {
+        return mealPrice;
+    }
+
+    public void setMealPrice(int mealPrice) {
+        this.mealPrice = mealPrice;
+    }
+
+    public MealAvailability getMealAvailability() {
+        return mealAvailability;
+    }
+
+    public void setMealAvailability(MealAvailability mealAvailability) {
+        this.mealAvailability = mealAvailability;
+    }
+
+    public List<OrderItem> getOrderItems() {
+        return orderItems;
+    }
+
+    public void setOrderItems(List<OrderItem> orderItems) {
+        this.orderItems = orderItems;
+    }
+
+    @Override
+    public String toString() {
+        return "Meal{" +
+                "id=" + id +
+                ", mealName='" + mealName + '\'' +
+                ", mealDescription='" + mealDescription + '\'' +
+                ", mealPrice=" + mealPrice +
+                ", mealAvailability=" + mealAvailability +
+                ", orderItems=" + orderItems +
+                '}';
+    }
 }

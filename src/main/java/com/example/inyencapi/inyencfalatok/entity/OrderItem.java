@@ -15,9 +15,6 @@ import lombok.ToString;
 
 @Entity
 @Table(name = "order_items")
-@Getter
-@Setter
-@ToString
 public class OrderItem  implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -38,4 +35,51 @@ public class OrderItem  implements Serializable {
 	@Column(name="quantity", nullable = false)
 	private int quantity;
 
+
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
+
+	public UUID getId() {
+		return id;
+	}
+
+	public void setId(UUID id) {
+		this.id = id;
+	}
+
+	public Order getOrder() {
+		return order;
+	}
+
+	public void setOrder(Order order) {
+		this.order = order;
+	}
+
+	public Meal getMeal() {
+		return meal;
+	}
+
+	public void setMeal(Meal meal) {
+		this.meal = meal;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
+	@Override
+	public String toString() {
+		return "OrderItem{" +
+				"id=" + id +
+				", order=" + order +
+				", meal=" + meal +
+				", quantity=" + quantity +
+				'}';
+	}
 }

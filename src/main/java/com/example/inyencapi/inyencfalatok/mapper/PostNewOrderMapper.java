@@ -9,8 +9,7 @@ import com.example.inyencapi.inyencfalatok.entity.Customer;
 
 @Mapper(componentModel = "spring")
 public interface PostNewOrderMapper {
-	
-	
+
 	@Mapping(source="customerDatas.customerName", target="customerName")
 	@Mapping(source="customerDatas.customerPhoneNumber", target="customerPhoneNumber")
 	@Mapping(source="customerDatas.customerEmail", target="customerEmail")

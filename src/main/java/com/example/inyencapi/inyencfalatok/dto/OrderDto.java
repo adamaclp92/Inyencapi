@@ -1,5 +1,6 @@
 package com.example.inyencapi.inyencfalatok.dto;
 
+import java.sql.Timestamp;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -19,45 +20,23 @@ public class OrderDto   {
   private String orderId = null;
 
   @JsonProperty("order_date")
-  private OffsetDateTime orderDate = null;
+  private Timestamp orderDate = null;
 
   /**
    * Gets or Sets orderStatus
    */
+
   public enum OrderStatusEnum {
-    FELDOLGOZAS_ALATT("Feldolgozas_alatt"),
-    KISZALLITAS_ALATT("Kiszallitas_alatt"),
-    TELJESITVE("Teljesitve");
-
-    private String value;
-
-    OrderStatusEnum(String value) {
-      this.value = value;
-    }
-
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static OrderStatusEnum fromValue(String text) {
-      for (OrderStatusEnum b : OrderStatusEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
-        }
-      }
-      return null;
-    }
+    Feldolgozas_alatt, Kiszallitas_alatt, Teljesitve
   }
+
   @JsonProperty("order_status")
   private OrderStatusEnum orderStatus = null;
 
   public OrderDto() {
   }
 
-  public OrderDto(String orderId, OffsetDateTime orderDate, OrderStatusEnum orderStatus) {
+  public OrderDto(String orderId, Timestamp orderDate, OrderStatusEnum orderStatus) {
     this.orderId = orderId;
     this.orderDate = orderDate;
     this.orderStatus = orderStatus;
@@ -71,11 +50,11 @@ public class OrderDto   {
     this.orderId = orderId;
   }
 
-  public OffsetDateTime getOrderDate() {
+  public Timestamp getOrderDate() {
     return orderDate;
   }
 
-  public void setOrderDate(OffsetDateTime orderDate) {
+  public void setOrderDate(Timestamp orderDate) {
     this.orderDate = orderDate;
   }
 

@@ -1,6 +1,7 @@
 package com.example.inyencapi.inyencfalatok.kafka;
 
-import com.example.inyencapi.inyencfalatok.dto.PostNewOrderResponseBodyDto;
+import com.example.inyencapi.inyencfalatok.dto.GetOrderByOrderIdResponseBodyDto;
+import com.example.inyencapi.inyencfalatok.dto.OrderDto;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -9,16 +10,11 @@ import org.springframework.stereotype.Service;
 
 import com.example.inyencapi.inyencfalatok.dto.PostNewOrderRequestBodyDto;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.web.context.request.async.DeferredResult;
 
 @Service
 public class KafkaProducer {
@@ -37,8 +33,7 @@ public class KafkaProducer {
 
     @Autowired
     private final KafkaTemplate<String, String> kafkaTemplateGetOrder;
-    private final ConcurrentHashMap<String, CompletableFuture<String>> pendingRequests = new ConcurrentHashMap<>();
-
+    private final ConcurrentHashMap<String, DeferredResult<GetOrderByOrderIdResponseBodyDto>> pendingRequests = new ConcurrentHashMap<>();
 
 
     public KafkaProducer(KafkaTemplate<String, PostNewOrderRequestBodyDto> kafkaTemplatePostNewOrder, KafkaTemplate<String, String> kafkaTemplateGetOrder) {
@@ -46,7 +41,9 @@ public class KafkaProducer {
         this.kafkaTemplateGetOrder = kafkaTemplateGetOrder;
     }
 
-    public  CompletableFuture<String> sendNewOrderMessage(PostNewOrderRequestBodyDto postNewOrderRequestBody) {
+
+    //PostNewOrder
+   /* public  CompletableFuture<String> sendNewOrderMessage(PostNewOrderRequestBodyDto postNewOrderRequestBody) {
     	 LOGGER.info(String.format("Message sent -> %s", postNewOrderRequestBody.toString()));
 
         CompletableFuture<String> future = new CompletableFuture<>();
@@ -59,16 +56,15 @@ public class KafkaProducer {
 
         kafkaTemplatePostNewOrder.send(message);
         return future;
-    }
+    }*/
 
-
-    public CompletableFuture<String> sendOrderStatusRequest(String orderId) {
+    //GetOrderByOrderId
+   /* public CompletableFuture<String> sendOrderStatusRequest(String orderId) {
         CompletableFuture<String> future = new CompletableFuture<>();
         pendingRequests.put(orderId, future);
         kafkaTemplateGetOrder.send(GET_ORDER_REQUEST_TOPIC, orderId);
         return future;
     }
-
 
     @KafkaListener(topics = GET_ORDER_RESPONSE_TOPIC, groupId = KAFKA_GROUP_ID)
     public void handleResponse(ConsumerRecord<String, String> record) {
@@ -78,6 +74,37 @@ public class KafkaProducer {
         CompletableFuture<String> future = pendingRequests.remove(orderId);
         if (future != null) {
             future.complete(orderStatus);
+        }
+    }*/
+
+    public DeferredResult<GetOrderByOrderIdResponseBodyDto> getOrderByOrderIdRequest(String orderId) throws Exception {
+        DeferredResult<GetOrderByOrderIdResponseBodyDto> deferredResult = new DeferredResult<>(5000L);
+        pendingRequests.put(orderId, deferredResult);
+
+        kafkaTemplateGetOrder.send(GET_ORDER_REQUEST_TOPIC, orderId);
+
+        deferredResult.onTimeout(() -> {
+            DeferredResult<GetOrderByOrderIdResponseBodyDto> pendingRequest = pendingRequests.remove(orderId);
+            if (pendingRequest != null) {
+                pendingRequest.setErrorResult(new Exception("Request timed out."));
+            }
+        });
+
+        deferredResult.onCompletion(() -> {
+            pendingRequests.remove(orderId);
+        });
+
+        return deferredResult;
+    }
+
+    @KafkaListener(topics = GET_ORDER_RESPONSE_TOPIC, groupId = KAFKA_GROUP_ID)
+    public void getOrderByOrderIdResponse(ConsumerRecord<String, GetOrderByOrderIdResponseBodyDto> record) {
+        String orderId = record.key();
+        GetOrderByOrderIdResponseBodyDto response = record.value();
+
+        DeferredResult<GetOrderByOrderIdResponseBodyDto> deferredResult = pendingRequests.remove(orderId);
+        if (deferredResult != null) {
+            deferredResult.setResult(response);
         }
     }
 }
