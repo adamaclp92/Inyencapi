@@ -1,7 +1,6 @@
 package com.example.inyencapi.inyencfalatok.kafka;
 
-import com.example.inyencapi.inyencfalatok.dto.GetOrderByOrderIdResponseBodyDto;
-import com.example.inyencapi.inyencfalatok.dto.OrderDto;
+import com.example.inyencapi.inyencfalatok.dto.*;
 import com.example.inyencapi.inyencfalatok.entity.*;
 import com.example.inyencapi.inyencfalatok.service.GetOrderByOrderIdServiceImpl;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -10,7 +9,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import com.example.inyencapi.inyencfalatok.dto.PostNewOrderRequestBodyDto;
 import com.example.inyencapi.inyencfalatok.service.PostNewOrderServiceImpl;
 
 
@@ -72,16 +70,33 @@ public class KafkaConsumer {
 	@KafkaListener(topics = GET_ORDER_REQUEST_TOPIC, groupId = KAFKA_GROUP_ID)
 	public void getOrderByOrderIdResponse(ConsumerRecord<String, String> record) {
 		String orderId = record.value();
-		UUID orderUuid = UUID.fromString(orderId);
+		UUID orderUuid = null;
+		LOGGER.info(orderId);
+		try{
+			orderUuid = UUID.fromString(orderId);
+		}catch (IllegalArgumentException e) {
+			LOGGER.info("Invalid UUID format: {}", orderId);
+			throw new IllegalArgumentException(e);
+		}
+		LOGGER.info(orderId);
 
-		OrderDto order = getOrderByOrderIdServiceImpl.GetOrderFromRepository(orderUuid);
 		LOGGER.info("asd");
+		Order order = getOrderByOrderIdServiceImpl.GetOrderFromRepository(orderUuid);
+		LOGGER.info("esd");
+		OrderDto orderDto = getOrderByOrderIdServiceImpl.MapOrderToOrderDto(order);
 
-		List<Meal> mealList = getOrderByOrderIdServiceImpl.GetMealsFromOrderItemList(orderUuid);
-		LOGGER.info("isd");
+		List<MealQuantityDto> mealQuantityDto = getOrderByOrderIdServiceImpl.GetMealsFromOrderItemList(orderUuid);
+
+		Customer customer = getOrderByOrderIdServiceImpl.GetCustomerFromRepository(order.getCustomer().getId());
+		CustomerDto customerDto = getOrderByOrderIdServiceImpl.MapCustomerToCustomerDto(customer);
+
+		AddressDto addressDto = getOrderByOrderIdServiceImpl.GetAddressFromRepository(customer.getAddress().getId());
 
 		GetOrderByOrderIdResponseBodyDto response = new GetOrderByOrderIdResponseBodyDto();
-		response.setOrderDatas(order);
+		response.setOrderDatas(orderDto);
+		response.setMealItems(mealQuantityDto);
+		response.setCustomerDatas(customerDto);
+		response.setCustomerAddress(addressDto);
 
 		kafkaTemplateGetOrder.send(GET_ORDER_RESPONSE_TOPIC, orderId, response);
 	}

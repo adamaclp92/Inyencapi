@@ -1,5 +1,8 @@
 package com.example.inyencapi.inyencfalatok.service;
 
+import com.example.inyencapi.inyencfalatok.dto.AddressDto;
+import com.example.inyencapi.inyencfalatok.dto.CustomerDto;
+import com.example.inyencapi.inyencfalatok.dto.MealQuantityDto;
 import com.example.inyencapi.inyencfalatok.dto.OrderDto;
 import com.example.inyencapi.inyencfalatok.entity.*;
 
@@ -8,14 +11,16 @@ import java.util.UUID;
 
 public interface GetOrderByOrderIdService {
 
-    OrderDto GetOrderFromRepository(UUID orderId);
+    Order GetOrderFromRepository(UUID orderId);
 
-    List<Meal> GetMealsFromOrderItemList(UUID orderId);
+    OrderDto MapOrderToOrderDto(Order orderFromDb);
 
-    Meal GetMealFromRepository(UUID mealId);
+    List<MealQuantityDto> GetMealsFromOrderItemList(UUID orderId);
 
     Customer GetCustomerFromRepository(UUID customerId);
 
-    Address GetAddressFromRepository(UUID addressId);
+    CustomerDto MapCustomerToCustomerDto(Customer customer);
+
+    AddressDto GetAddressFromRepository(UUID addressId);
 
 }

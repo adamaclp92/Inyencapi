@@ -1,9 +1,11 @@
 package com.example.inyencapi.inyencfalatok.service;
 
+import com.example.inyencapi.inyencfalatok.dto.AddressDto;
+import com.example.inyencapi.inyencfalatok.dto.CustomerDto;
+import com.example.inyencapi.inyencfalatok.dto.MealQuantityDto;
 import com.example.inyencapi.inyencfalatok.dto.OrderDto;
 import com.example.inyencapi.inyencfalatok.entity.*;
 import com.example.inyencapi.inyencfalatok.mapper.GetOrderMapper;
-import com.example.inyencapi.inyencfalatok.mapper.PostNewOrderMapper;
 import com.example.inyencapi.inyencfalatok.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,7 @@ public class GetOrderByOrderIdServiceImpl implements GetOrderByOrderIdService{
     GetOrderMapper getOrderMapper;
 
     @Override
-    public OrderDto GetOrderFromRepository(UUID orderId) {
+    public Order GetOrderFromRepository(UUID orderId) {
 
         List<Order> orders = ordersRepository.findAll();
 
@@ -45,50 +47,68 @@ public class GetOrderByOrderIdServiceImpl implements GetOrderByOrderIdService{
         for(Order o : orders) {
             if(o.getOrderId().equals(orderId)) orderFromDb = o;
         }
+        return orderFromDb;
+    }
 
-        OrderDto mappedOrder = getOrderMapper.toOrderDto(orderFromDb);
-        //LOGGER.info(mappedOrder.toString());
-        return mappedOrder;
+    @Override
+    public OrderDto MapOrderToOrderDto(Order orderFromDb){
+        return getOrderMapper.toOrderDto(orderFromDb);
     }
 
 
     @Override
-    public List<Meal> GetMealsFromOrderItemList(UUID orderId) {
-        List<Meal> mealsList = new ArrayList<>();
+    public List<MealQuantityDto> GetMealsFromOrderItemList(UUID orderId) {
+        List<MealQuantityDto> mealsList = new ArrayList<>();
 
         List<OrderItem> orderItems = orderItemsRepository.findAll();
 
-        LOGGER.info("1");
-        List<OrderItem> orderItemsFromDb = new ArrayList<>();
-
         if(!orderItems.isEmpty()){
             for(OrderItem oi : orderItems){
-                LOGGER.info(oi.getOrder().getOrderId().toString());
                 if(oi.getOrder().getOrderId().toString().equals(orderId.toString())) {
-                    LOGGER.info("innen kell folytatni");
-                   // LOGGER.info(oi.toString());
-                    mealsList.add(oi.getMeal());
+                    MealQuantityDto actualMealQuantity = getOrderMapper.toMealQuantityDto(oi);
+                    mealsList.add(actualMealQuantity);
                 }
             }
         }
-
-        LOGGER.info("3");
         return mealsList;
-    }
-
-
-    @Override
-    public Meal GetMealFromRepository(UUID mealId) {
-        return null;
     }
 
     @Override
     public Customer GetCustomerFromRepository(UUID customerId) {
-        return null;
+        List<Customer> customers = customerRepository.findAll();
+
+        Customer customer = null;
+        if(!customers.isEmpty()){
+            for(Customer c : customers){
+                if(c.getId().equals(customerId)) {
+                    customer = c;
+                }
+            }
+        }
+        return customer;
     }
 
     @Override
-    public Address GetAddressFromRepository(UUID addressId) {
-        return null;
+    public CustomerDto MapCustomerToCustomerDto(Customer customer) {
+        return getOrderMapper.toCustomerDto(customer);
     }
+
+    @Override
+    public AddressDto GetAddressFromRepository(UUID addressId) {
+
+        List<Address> addresses = addressesRepository.findAll();
+
+        Address address = null;
+        if(!addresses.isEmpty()){
+            for(Address a : addresses){
+                if(a.getId().equals(addressId)) {
+                    address = a;
+                }
+            }
+        }
+
+        return getOrderMapper.toAddressDto(address);
+    }
+
+
 }
