@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -30,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -63,34 +65,38 @@ class OrderControllerTest {
         validRequestBody.setCustomerAddress(address);
         validRequestBody.addMealItemsItem(meal1);
         validRequestBody.addMealItemsItem(meal2);
-        validRequestBody.addMealItemsItem(meal2);
 
         invalidRequestBody = new PostNewOrderRequestBodyDto();
         invalidRequestBody.setCustomerAddress(address);
         invalidRequestBody.addMealItemsItem(meal1);
         invalidRequestBody.addMealItemsItem(meal2);
-        invalidRequestBody.addMealItemsItem(meal2);
     }
 
     @Test
-    void writeMessageToTopic_OK() throws Exception{
-        mockMvc.perform(post("/api/orders")
+    void postNewOrder_OK() throws Exception{
+        MvcResult mvcResult = mockMvc.perform(post("/api/orders")
                         .with(SecurityMockMvcRequestPostProcessors.httpBasic("user", "password"))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequestBody))
                         .accept(MediaType.APPLICATION_JSON))
+                        .andExpect(request().asyncStarted())
+                        .andReturn();
 
+         mvcResult.getRequest().getAsyncContext().setTimeout(10000);
+         mvcResult.getAsyncResult();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
-                .andExpect(content().string(String.format("Rendeles leadva: %s", validRequestBody.toString())));
+                .andExpect(jsonPath("$.status").exists())
+                .andExpect(jsonPath("$.order_id").exists());
 
-        verify(kafkaProducer).sendNewOrderMessage(Mockito.eq(validRequestBody));
     }
 
     @Test
-    void writeMessageToTopic_Unauthorized() throws Exception {
+    void postNewOrder_Unauthorized() throws Exception {
         mockMvc.perform(post("/api/orders")
-                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("user", "wongpassword"))
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("user", "wrongpassword"))
                         .with(csrf())
                         .accept(MediaType.APPLICATION_JSON))
 
@@ -109,7 +115,9 @@ class OrderControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
 
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("customer_datas property is missing!"));
+                .andExpect(jsonPath("$.error_code").value("400 BAD_REQUEST"))
+                .andExpect(jsonPath("$.error_message").value("customer_datas property is missing!"))
+                .andExpect(jsonPath("$.timestamp").exists());
     }
 }
 

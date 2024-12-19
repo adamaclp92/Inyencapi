@@ -23,7 +23,7 @@ public class Order implements Serializable{
     @Id
     @Column(name = "id", nullable = false, columnDefinition = "char(36)")
     @JdbcTypeCode(SqlTypes.CHAR)
-    private UUID orderId = UUID.randomUUID();
+    private UUID orderId;
 
     @Column(name="order_date", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp  orderDate = new Timestamp(System.currentTimeMillis());

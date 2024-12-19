@@ -1,5 +1,7 @@
 package com.example.inyencapi.inyencfalatok.mapper;
 
+import com.example.inyencapi.inyencfalatok.dto.PostNewOrderResponseBodyDto;
+import com.example.inyencapi.inyencfalatok.entity.Order;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -19,4 +21,9 @@ public interface PostNewOrderMapper {
 	@Mapping(source="customerAddress.addressCity", target="city")
 	@Mapping(source="customerAddress.addressStreetNumber", target="streetNumber")
 	Address toAddressEntity(PostNewOrderRequestBodyDto dto);
+
+	@Mapping(source = "orderId", target = "orderId")
+	@Mapping(source = "orderStatus", target = "status")
+	PostNewOrderResponseBodyDto toResponseBodyDto(Order order);
+
 }

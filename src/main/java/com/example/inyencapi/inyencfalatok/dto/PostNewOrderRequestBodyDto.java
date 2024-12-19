@@ -1,5 +1,6 @@
 package com.example.inyencapi.inyencfalatok.dto;
 
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -27,7 +28,7 @@ public class PostNewOrderRequestBodyDto   {
 
   @JsonProperty("meal_items")
   @NotNull(message = "meal_items property is missing!")
-  private List<MealQuantityDto> mealItems;
+  private List<MealQuantityDto> mealItems = new ArrayList<>();
 
   public PostNewOrderRequestBodyDto() {
   }

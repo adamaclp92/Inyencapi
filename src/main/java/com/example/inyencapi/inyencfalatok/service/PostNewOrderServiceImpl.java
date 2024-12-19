@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import com.example.inyencapi.inyencfalatok.dto.MealQuantityDto;
-import com.example.inyencapi.inyencfalatok.kafka.KafkaConsumer;
+import com.example.inyencapi.inyencfalatok.dto.PostNewOrderResponseBodyDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,10 +146,15 @@ public class PostNewOrderServiceImpl implements PostNewOrderService{
 	@Override
 	public Order SaveOrder(PostNewOrderRequestBodyDto dto) {
 		Order newOrder = new Order();
+		newOrder.setOrderId(dto.getOrderId());
 		newOrder.setCustomer(GetCustomerFromRepository(dto));
 
 		ordersRepository.save(newOrder);
 
 		return newOrder;
+	}
+
+	public PostNewOrderResponseBodyDto responseBodyMapper(Order newOrder) {
+		return postNewOrderMapper.toResponseBodyDto(newOrder);
 	}
 }
