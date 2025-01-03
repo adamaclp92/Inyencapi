@@ -4,7 +4,9 @@ import org.springframework.stereotype.Repository;
 
 import com.example.inyencapi.inyencfalatok.entity.Meal;
 
+import java.util.UUID;
+
 @Repository
-public interface MealsRepository extends JpaRepository<Meal, Long>{
+public interface MealsRepository extends JpaRepository<Meal, UUID>{
 
 }

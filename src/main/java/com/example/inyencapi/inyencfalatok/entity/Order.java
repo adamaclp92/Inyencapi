@@ -1,20 +1,15 @@
 package com.example.inyencapi.inyencfalatok.entity;
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.example.inyencapi.inyencfalatok.enums.OrderStatus;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.ToString;
 
 @Entity
 @Table(name = "orders")
@@ -39,10 +34,6 @@ public class Order implements Serializable{
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
-
-    public enum OrderStatus {
-    	Feldolgozas_alatt, Kiszallitas_alatt, Teljesitve
-    }
 
     @Override
     public boolean equals(Object obj) {
@@ -95,7 +86,7 @@ public class Order implements Serializable{
                 "orderId=" + orderId +
                 ", orderDate=" + orderDate +
                 ", orderStatus=" + orderStatus +
-                ", customer=" + customer +
+                ", customer=" + customer.getId() +
                 ", orderItems=" + orderItems +
                 '}';
     }

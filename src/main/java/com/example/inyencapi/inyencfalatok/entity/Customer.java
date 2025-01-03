@@ -120,7 +120,7 @@ public class Customer implements Serializable {
 				"id=" + id +
 				", customerName='" + customerName + '\'' +
 				", customerPhoneNumber='" + customerPhoneNumber + '\'' +
-				", address=" + address +
+				", address=" + address.getId() +
 				", customerEmail='" + customerEmail + '\'' +
 				", orders=" + orders +
 				'}';

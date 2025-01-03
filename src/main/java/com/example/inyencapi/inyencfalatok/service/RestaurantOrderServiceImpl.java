@@ -1,12 +1,16 @@
 package com.example.inyencapi.inyencfalatok.service;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 import com.example.inyencapi.inyencfalatok.dto.MealQuantityDto;
 import com.example.inyencapi.inyencfalatok.dto.PostNewOrderResponseBodyDto;
+import com.example.inyencapi.inyencfalatok.exception.ObjectNotFoundException;
+import com.example.inyencapi.inyencfalatok.exception.ProductNotAvailableException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +31,9 @@ import com.example.inyencapi.inyencfalatok.repository.OrdersRepository;
 
 
 @Service
-public class PostNewOrderServiceImpl implements PostNewOrderService{
+public class RestaurantOrderServiceImpl implements RestaurantOrderService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(PostNewOrderServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RestaurantOrderServiceImpl.class);
 	
 	@Autowired
 	AddressesRepository addressesRepository;
@@ -45,12 +49,14 @@ public class PostNewOrderServiceImpl implements PostNewOrderService{
 	
 	@Autowired
 	Order_ItemsRepository orderItemsRepository;
-	
+
 	@Autowired
 	PostNewOrderMapper postNewOrderMapper;
 
 	@Override
 	public Address SaveAddressIfNotExist(PostNewOrderRequestBodyDto body) {
+		LOGGER.info("1");
+		LOGGER.info(body.toString());
 		Address newAddress = postNewOrderMapper.toAddressEntity(body);
 
 		if(!IsAddressExistInRepository(newAddress)) {
@@ -62,25 +68,23 @@ public class PostNewOrderServiceImpl implements PostNewOrderService{
 
 	@Override
 	public boolean IsAddressExistInRepository(Address address) {
-		return Objects.nonNull(GetAddressFromRepository(address));
-	}
-
-	@Override
-	public Address GetAddressFromRepository(Address address) {
 		List<Address> allAddress = addressesRepository.findAll();
-			
-			Address addressFromDB = null;
-			for(Address a : allAddress) {
-				if(a.equals(address)) addressFromDB = a;
-			}
-			return addressFromDB;
+
+		Address addressFromDB = null;
+		for(Address a : allAddress) {
+			if(a.equals(address)) addressFromDB = a;
+		}
+		return Objects.nonNull(addressFromDB);
 	}
 
 	@Override
 	public Customer SaveCustomerIfNotExist(PostNewOrderRequestBodyDto dto, Address address) {
+		LOGGER.info("4");
 		Customer newCustomer = postNewOrderMapper.toCustomerEntity(dto);
+		LOGGER.info("newCustomer.toString()");
 		
 		if(!IsCustomerExistInRepository(newCustomer)) {
+			LOGGER.info("newCustomer.toString()2");
 			newCustomer.setAddress(address);
 			customerRepository.save(newCustomer);
 		}
@@ -90,71 +94,90 @@ public class PostNewOrderServiceImpl implements PostNewOrderService{
 
 	@Override
 	public boolean IsCustomerExistInRepository(Customer customer) {
+		LOGGER.info("asd");
 		List<Customer> allCustomer = customerRepository.findAll();
 		boolean isCustomerExist = false;
+		LOGGER.info("esd");
 		for(Customer c : allCustomer) {
-            if (c.equals(customer)) {
-                isCustomerExist = true;
-                break;
-            }
+			LOGGER.info(c.getId().toString());
+			LOGGER.info(c.getCustomerName().toString());
+			LOGGER.info(c.getCustomerEmail().toString());
+			if (c.equals(customer)) {
+				isCustomerExist = true;
+				break;
+			}
 		}
-		
+		LOGGER.info("usd");
+		LOGGER.info(String.valueOf(isCustomerExist));
 		return isCustomerExist;
 	}
 
 	@Override
 	public Customer GetCustomerFromRepository(PostNewOrderRequestBodyDto dto) {
-        Customer mappedCustomer = postNewOrderMapper.toCustomerEntity(dto);
+		Customer mappedCustomer = postNewOrderMapper.toCustomerEntity(dto);
 
-        List<Customer> allCustomer = customerRepository.findAll();
-		
+		List<Customer> allCustomer = customerRepository.findAll();
+
 		Customer customerFromDb = null;
 		for(Customer c : allCustomer) {
 			if(c.equals(mappedCustomer)) customerFromDb = c;
 		}
-		
+
 		return customerFromDb;
 	}
 
 	@Override
 	public Meal GetMealFromRepository(UUID mealId) {
-		List<Meal> meals = mealsRepository.findAll();
-		Meal mealFromDb = null;
-		for(Meal m : meals) {
-			if(m.getId().equals(mealId)) mealFromDb = m;
+
+		Meal meal = mealsRepository.findById(mealId)
+				.orElseThrow(() -> new ObjectNotFoundException("Meal not found with ID: " + mealId));
+
+		if(meal.getMealAvailability() == Meal.MealAvailability.kifogyott){
+			return null;
+		}else{
+			return meal;
 		}
-		return mealFromDb;
+
 	}
 
 	@Override
 	public void SaveOrderItems(PostNewOrderRequestBodyDto dto, Order newOrder) {
 		List<MealQuantityDto> mealItemsFromDto = dto.getMealItems();
+		List<OrderItem> orderItemList = new ArrayList<>();
 		for(MealQuantityDto d : mealItemsFromDto) {
 
 			OrderItem newOrderItem = new OrderItem();
 			newOrderItem.setOrder(newOrder);
 
 			Meal actualMeal = GetMealFromRepository(d.getMealId());
+			if(actualMeal == null){
+				ordersRepository.delete(newOrder);
+				throw new ProductNotAvailableException("Item is out of stock: " + d.getMealId());
+			}
+
 			newOrderItem.setMeal(actualMeal);
 			newOrderItem.setQuantity(d.getMealQuantity());
-			orderItemsRepository.save(newOrderItem);
-
-			//LOGGER.info(newOrderItem.toString());
+			orderItemList.add(newOrderItem);
+		}
+		for(OrderItem o : orderItemList){
+			orderItemsRepository.save(o);
 		}
     }
 
 	@Override
 	public Order SaveOrder(PostNewOrderRequestBodyDto dto) {
+		LOGGER.info("xxx");
 		Order newOrder = new Order();
 		newOrder.setOrderId(dto.getOrderId());
 		newOrder.setCustomer(GetCustomerFromRepository(dto));
-
+		LOGGER.info("newOrder.getCustomer().getCustomerName()");
+		LOGGER.info(newOrder.getCustomer().getCustomerName());
 		ordersRepository.save(newOrder);
-
+		LOGGER.info("newOrder.getCustomer().getCustomerName()2");
+		LOGGER.info("yyy");
 		return newOrder;
 	}
 
-	public PostNewOrderResponseBodyDto responseBodyMapper(Order newOrder) {
-		return postNewOrderMapper.toResponseBodyDto(newOrder);
-	}
 }
+
+

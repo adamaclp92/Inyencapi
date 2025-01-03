@@ -1,10 +1,9 @@
 package com.example.inyencapi.inyencfalatok.service;
 
-import com.example.inyencapi.inyencfalatok.dto.AddressDto;
-import com.example.inyencapi.inyencfalatok.dto.CustomerDto;
-import com.example.inyencapi.inyencfalatok.dto.MealQuantityDto;
-import com.example.inyencapi.inyencfalatok.dto.OrderDto;
+import com.example.inyencapi.inyencfalatok.dto.*;
 import com.example.inyencapi.inyencfalatok.entity.*;
+import com.example.inyencapi.inyencfalatok.exception.ObjectNotFoundException;
+import com.example.inyencapi.inyencfalatok.exception.OrderNotFoundException;
 import com.example.inyencapi.inyencfalatok.mapper.GetOrderMapper;
 import com.example.inyencapi.inyencfalatok.repository.*;
 import org.slf4j.Logger;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -42,13 +42,8 @@ public class GetOrderByOrderIdServiceImpl implements GetOrderByOrderIdService{
     @Override
     public Order GetOrderFromRepository(UUID orderId) {
 
-        List<Order> orders = ordersRepository.findAll();
-
-        Order orderFromDb = null;
-        for(Order o : orders) {
-            if(o.getOrderId().equals(orderId)) orderFromDb = o;
-        }
-        return orderFromDb;
+        return ordersRepository.findById(orderId)
+                .orElseThrow(() -> new ObjectNotFoundException("Order not found with ID: " + orderId));
     }
 
     @Override
@@ -76,17 +71,9 @@ public class GetOrderByOrderIdServiceImpl implements GetOrderByOrderIdService{
 
     @Override
     public Customer GetCustomerFromRepository(UUID customerId) {
-        List<Customer> customers = customerRepository.findAll();
+        return customerRepository.findById(customerId)
+                .orElseThrow(() -> new ObjectNotFoundException("Customer not found with ID: " + customerId));
 
-        Customer customer = null;
-        if(!customers.isEmpty()){
-            for(Customer c : customers){
-                if(c.getId().equals(customerId)) {
-                    customer = c;
-                }
-            }
-        }
-        return customer;
     }
 
     @Override
@@ -96,23 +83,37 @@ public class GetOrderByOrderIdServiceImpl implements GetOrderByOrderIdService{
 
     @Override
     public AddressDto GetAddressFromRepository(UUID addressId) {
-
-        List<Address> addresses = addressesRepository.findAll();
-
-        Address address = null;
-        if(!addresses.isEmpty()){
-            for(Address a : addresses){
-                if(a.getId().equals(addressId)) {
-                    address = a;
-                }
-            }
-        }
+        Address address = addressesRepository.findById(addressId)
+                .orElseThrow(() -> new ObjectNotFoundException("Address not found with ID: " + addressId));
 
         return getOrderMapper.toAddressDto(address);
     }
 
+    @Override
+    public GetOrderByOrderIdResponseBodyDto GetResponseBodyDto(UUID orderId) {
+        GetOrderByOrderIdResponseBodyDto response = new GetOrderByOrderIdResponseBodyDto();
 
+        Order orderFromDb = GetOrderFromRepository(orderId);
+        if(orderFromDb == null){
+            throw new OrderNotFoundException("Order with ID " + orderId + " not found.");
+        }
 
+        OrderDto responseOrderDto =  MapOrderToOrderDto(orderFromDb);
 
+        List<MealQuantityDto> responseMealsList =  GetMealsFromOrderItemList(orderId);
+
+        Customer customerFromDb = GetCustomerFromRepository(orderFromDb.getCustomer().getId());
+        CustomerDto responseCustomerDto = MapCustomerToCustomerDto(customerFromDb);
+
+        AddressDto responseAddressDto = GetAddressFromRepository(customerFromDb.getAddress().getId());
+
+        response.setOrderDatas(responseOrderDto);
+        response.setMealItems(responseMealsList);
+        response.setCustomerDatas(responseCustomerDto);
+        response.setCustomerAddress(responseAddressDto);
+
+        return response;
+
+    }
 
 }

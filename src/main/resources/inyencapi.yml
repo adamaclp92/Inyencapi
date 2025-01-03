@@ -55,6 +55,7 @@ paths:
           name: order_id
           schema:
             type: string
+            format: uuid
           required: true
           description: Uuid of order_id
       responses:
@@ -141,6 +142,7 @@ components:
       properties:
         order_id:
           type: string
+          format: uuid
         order_date:
           type: string
           format: date-time
@@ -155,6 +157,7 @@ components:
       properties:
         meal_id:
           type: string
+          format: uuid
         meal_quantity:
           type: integer
     Customer:

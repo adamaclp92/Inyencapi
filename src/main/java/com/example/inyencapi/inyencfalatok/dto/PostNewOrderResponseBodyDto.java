@@ -3,6 +3,7 @@ package com.example.inyencapi.inyencfalatok.dto;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.example.inyencapi.inyencfalatok.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -12,24 +13,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class PostNewOrderResponseBodyDto   {
 	
   @JsonProperty("status")
-  private String status;
+  private OrderStatus status;
 
   @JsonProperty("order_id")
   private UUID orderId;
 
+
   public PostNewOrderResponseBodyDto() {
   }
 
-  public PostNewOrderResponseBodyDto(String status, UUID orderId) {
+  public PostNewOrderResponseBodyDto(OrderStatus status, UUID orderId) {
     this.status = status;
     this.orderId = orderId;
   }
 
-  public String getStatus() {
+  public OrderStatus getStatus() {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(OrderStatus status) {
     this.status = status;
   }
 

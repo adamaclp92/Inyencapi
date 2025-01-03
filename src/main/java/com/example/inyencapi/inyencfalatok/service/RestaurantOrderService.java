@@ -8,25 +8,19 @@ import com.example.inyencapi.inyencfalatok.entity.Customer;
 import com.example.inyencapi.inyencfalatok.entity.Meal;
 import com.example.inyencapi.inyencfalatok.entity.Order;
 
-public interface PostNewOrderService {
+public interface RestaurantOrderService {
 
 	Address SaveAddressIfNotExist(PostNewOrderRequestBodyDto body);
 	
 	boolean IsAddressExistInRepository(Address address);
-	
-	Address GetAddressFromRepository(Address address);
-	
-	//UUID GetAddressIdFromRepository(Address address);
-	
-	
+
 	
 	Customer SaveCustomerIfNotExist(PostNewOrderRequestBodyDto dto, Address address);
 	
 	boolean IsCustomerExistInRepository(Customer customer);
-	
-	Customer GetCustomerFromRepository(PostNewOrderRequestBodyDto dto);
-	
-	
+
+	 Customer GetCustomerFromRepository(PostNewOrderRequestBodyDto dto);
+
 	
 	Meal GetMealFromRepository(UUID mealId);
 	

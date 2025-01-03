@@ -2,61 +2,44 @@ package com.example.inyencapi.inyencfalatok.controller;
 
 import com.example.inyencapi.inyencfalatok.dto.GetOrderByOrderIdResponseBodyDto;
 import com.example.inyencapi.inyencfalatok.dto.PostNewOrderResponseBodyDto;
+import com.example.inyencapi.inyencfalatok.exception.OrderNotFoundException;
+import com.example.inyencapi.inyencfalatok.kafka.OrderProducer;
+import com.example.inyencapi.inyencfalatok.service.GetOrderByOrderIdService;
+import com.example.inyencapi.inyencfalatok.service.GetOrderByOrderIdServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.inyencapi.inyencfalatok.dto.PostNewOrderRequestBodyDto;
-import com.example.inyencapi.inyencfalatok.kafka.KafkaProducer;
 
 import jakarta.validation.Valid;
-import org.springframework.web.context.request.async.DeferredResult;
+
+import java.util.UUID;
+
 
 @RequestMapping("/api")
 @RestController
 public class OrderController {
 
-	private final KafkaProducer kafkaProducer;
+	private final OrderProducer orderGwProducer;
 
-	public OrderController(KafkaProducer producer) {
-		this.kafkaProducer = producer;
-		
-	}
+	private final GetOrderByOrderIdServiceImpl getOrderByOrderIdService;
+
+	public OrderController(OrderProducer producer, GetOrderByOrderIdServiceImpl getOrderByOrderIdService) {
+		this.orderGwProducer = producer;
+        this.getOrderByOrderIdService = getOrderByOrderIdService;
+    }
 	
 	@PostMapping("/orders")
-	public DeferredResult<ResponseEntity<?>> postNewOrder(@RequestBody @Valid PostNewOrderRequestBodyDto body) throws Exception{
-		DeferredResult<ResponseEntity<?>> deferredResult = new DeferredResult<>(5000L);
-		kafkaProducer.postNewOrderRequest(body, deferredResult);
-		deferredResult.onError(throwable -> {
-			deferredResult.setErrorResult(new Exception("An error occurred while processing the order: " + throwable.getMessage()));
-		});
+	public ResponseEntity<PostNewOrderResponseBodyDto> postNewOrder(@RequestBody @Valid PostNewOrderRequestBodyDto body) throws Exception{
+		PostNewOrderResponseBodyDto postNewOrderResponseBodyDto =  orderGwProducer.postNewOrderRequest(body);
+		return ResponseEntity.ok(postNewOrderResponseBodyDto);
 
-		deferredResult.onTimeout(() -> {
-			deferredResult.setErrorResult(new Exception("Request timeout"));
-		});
-
-
-		return deferredResult;
 	}
 
 	@GetMapping("/orders/{orderId}")
-	public DeferredResult<GetOrderByOrderIdResponseBodyDto> getOrderByOrderId(@PathVariable String orderId) throws Exception {
-		DeferredResult<GetOrderByOrderIdResponseBodyDto> deferredResult = new DeferredResult<>(5000L);
+	public ResponseEntity<GetOrderByOrderIdResponseBodyDto> getOrderByOrderId(@PathVariable UUID orderId) throws Exception {
+		GetOrderByOrderIdResponseBodyDto getOrderByOrderIdResponseBodyDto =  getOrderByOrderIdService.GetResponseBodyDto(orderId);
 
-		if (!orderId.matches("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")) {
-			deferredResult.setErrorResult(new IllegalArgumentException("Invalid orderId format!"));
-			return deferredResult;
-		}
-
-		kafkaProducer.getOrderByOrderIdRequest(orderId, deferredResult);
-		deferredResult.onError(throwable -> {
-			deferredResult.setErrorResult(new Exception("An error occurred while processing the order: " + throwable.getMessage()));
-		});
-
-		deferredResult.onTimeout(() -> {
-			deferredResult.setErrorResult(new Exception("Request timeout"));
-		});
-
-		return deferredResult;
-
+		return ResponseEntity.ok(getOrderByOrderIdResponseBodyDto);
 	}
 }

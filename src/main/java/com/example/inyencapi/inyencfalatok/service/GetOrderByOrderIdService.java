@@ -1,9 +1,6 @@
 package com.example.inyencapi.inyencfalatok.service;
 
-import com.example.inyencapi.inyencfalatok.dto.AddressDto;
-import com.example.inyencapi.inyencfalatok.dto.CustomerDto;
-import com.example.inyencapi.inyencfalatok.dto.MealQuantityDto;
-import com.example.inyencapi.inyencfalatok.dto.OrderDto;
+import com.example.inyencapi.inyencfalatok.dto.*;
 import com.example.inyencapi.inyencfalatok.entity.*;
 
 import java.util.List;
@@ -22,5 +19,7 @@ public interface GetOrderByOrderIdService {
     CustomerDto MapCustomerToCustomerDto(Customer customer);
 
     AddressDto GetAddressFromRepository(UUID addressId);
+
+    GetOrderByOrderIdResponseBodyDto GetResponseBodyDto(UUID orderId);
 
 }

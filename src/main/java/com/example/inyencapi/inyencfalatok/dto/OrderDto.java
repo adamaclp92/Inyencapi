@@ -2,6 +2,8 @@ package com.example.inyencapi.inyencfalatok.dto;
 
 import java.sql.Timestamp;
 import java.util.Objects;
+
+import com.example.inyencapi.inyencfalatok.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -26,17 +28,13 @@ public class OrderDto   {
    * Gets or Sets orderStatus
    */
 
-  public enum OrderStatusEnum {
-    Feldolgozas_alatt, Kiszallitas_alatt, Teljesitve
-  }
-
   @JsonProperty("order_status")
-  private OrderStatusEnum orderStatus = null;
+  private OrderStatus orderStatus = null;
 
   public OrderDto() {
   }
 
-  public OrderDto(String orderId, Timestamp orderDate, OrderStatusEnum orderStatus) {
+  public OrderDto(String orderId, Timestamp orderDate, OrderStatus orderStatus) {
     this.orderId = orderId;
     this.orderDate = orderDate;
     this.orderStatus = orderStatus;
@@ -58,11 +56,11 @@ public class OrderDto   {
     this.orderDate = orderDate;
   }
 
-  public OrderStatusEnum getOrderStatus() {
+  public OrderStatus getOrderStatus() {
     return orderStatus;
   }
 
-  public void setOrderStatus(OrderStatusEnum orderStatus) {
+  public void setOrderStatus(OrderStatus orderStatus) {
     this.orderStatus = orderStatus;
   }
 

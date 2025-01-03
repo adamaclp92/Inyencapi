@@ -16,7 +16,6 @@ public interface GetOrderMapper {
 
     @Mapping(source = "orderId", target = "orderId")
     @Mapping(source = "orderDate", target = "orderDate")
-    @Mapping(source = "orderStatus", target = "orderStatus")
     OrderDto toOrderDto(Order order);
 
     @Mapping(source = "meal.id", target = "mealId")

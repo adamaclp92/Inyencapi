@@ -20,6 +20,10 @@ public class ErrorResponseDto {
         this.errorMessage = errorMessage;
     }
 
+
+    public ErrorResponseDto() {
+    }
+
     // Getters and setters
     public String getErrorCode() {
         return errorCode;
@@ -43,5 +47,14 @@ public class ErrorResponseDto {
 
     public void setTimestamp(Timestamp timestamp) {
         this.timestamp = timestamp;
+    }
+
+    @Override
+    public String toString() {
+        return "ErrorResponseDto{" +
+                "errorCode='" + errorCode + '\'' +
+                ", errorMessage='" + errorMessage + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
     }
 }

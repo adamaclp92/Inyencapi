@@ -22,8 +22,4 @@ public interface PostNewOrderMapper {
 	@Mapping(source="customerAddress.addressStreetNumber", target="streetNumber")
 	Address toAddressEntity(PostNewOrderRequestBodyDto dto);
 
-	@Mapping(source = "orderId", target = "orderId")
-	@Mapping(source = "orderStatus", target = "status")
-	PostNewOrderResponseBodyDto toResponseBodyDto(Order order);
-
 }
