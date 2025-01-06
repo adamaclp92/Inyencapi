@@ -3,6 +3,8 @@ package com.example.inyencapi.inyencfalatok.service;
 import java.util.UUID;
 
 import com.example.inyencapi.inyencfalatok.dto.PostNewOrderRequestBodyDto;
+import com.example.inyencapi.inyencfalatok.dto.UpdatableOrderDto;
+import com.example.inyencapi.inyencfalatok.dto.UpdateOrderStateResponseBodyDto;
 import com.example.inyencapi.inyencfalatok.entity.Address;
 import com.example.inyencapi.inyencfalatok.entity.Customer;
 import com.example.inyencapi.inyencfalatok.entity.Meal;
@@ -29,6 +31,6 @@ public interface RestaurantOrderService {
 	
 	
 	Order SaveOrder(PostNewOrderRequestBodyDto body);
-	
-	
+
+	UpdateOrderStateResponseBodyDto UpdateOrderState(UpdatableOrderDto orderDatas);
 }

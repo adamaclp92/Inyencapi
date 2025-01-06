@@ -1,22 +1,19 @@
 package com.example.inyencapi.inyencfalatok.service;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
-import com.example.inyencapi.inyencfalatok.dto.MealQuantityDto;
-import com.example.inyencapi.inyencfalatok.dto.PostNewOrderResponseBodyDto;
+import com.example.inyencapi.inyencfalatok.dto.*;
 import com.example.inyencapi.inyencfalatok.exception.ObjectNotFoundException;
+import com.example.inyencapi.inyencfalatok.exception.OrderNotFoundException;
 import com.example.inyencapi.inyencfalatok.exception.ProductNotAvailableException;
+import com.example.inyencapi.inyencfalatok.mapper.UpdateOrderStateMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.inyencapi.inyencfalatok.dto.PostNewOrderRequestBodyDto;
 import com.example.inyencapi.inyencfalatok.entity.Address;
 import com.example.inyencapi.inyencfalatok.entity.Customer;
 import com.example.inyencapi.inyencfalatok.entity.Meal;
@@ -52,6 +49,9 @@ public class RestaurantOrderServiceImpl implements RestaurantOrderService {
 
 	@Autowired
 	PostNewOrderMapper postNewOrderMapper;
+
+	@Autowired
+	UpdateOrderStateMapper updateOrderStateMapper;
 
 	@Override
 	public Address SaveAddressIfNotExist(PostNewOrderRequestBodyDto body) {
@@ -166,16 +166,27 @@ public class RestaurantOrderServiceImpl implements RestaurantOrderService {
 
 	@Override
 	public Order SaveOrder(PostNewOrderRequestBodyDto dto) {
-		LOGGER.info("xxx");
 		Order newOrder = new Order();
 		newOrder.setOrderId(dto.getOrderId());
 		newOrder.setCustomer(GetCustomerFromRepository(dto));
-		LOGGER.info("newOrder.getCustomer().getCustomerName()");
-		LOGGER.info(newOrder.getCustomer().getCustomerName());
 		ordersRepository.save(newOrder);
-		LOGGER.info("newOrder.getCustomer().getCustomerName()2");
-		LOGGER.info("yyy");
 		return newOrder;
+	}
+
+	@Override
+	public UpdateOrderStateResponseBodyDto UpdateOrderState(UpdatableOrderDto orderDatas) {
+
+		Optional<Order> originalOrder = ordersRepository.findById(orderDatas.getOrderId());
+
+		if (originalOrder.isPresent()) {
+			Order updatableOrder = updateOrderStateMapper.toOrder(orderDatas);
+			updatableOrder.setCustomer(originalOrder.get().getCustomer());
+			ordersRepository.save(updatableOrder);
+
+			return new UpdateOrderStateResponseBodyDto("Record updated", updatableOrder.getOrderId().toString());
+		} else {
+			throw new OrderNotFoundException("Order not found with id " + originalOrder);
+		}
 	}
 
 }

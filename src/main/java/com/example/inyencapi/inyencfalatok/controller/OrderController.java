@@ -40,9 +40,4 @@ public class OrderController {
 		return ResponseEntity.ok(getOrderByOrderIdResponseBodyDto);
 	}
 
-	/*@PutMapping("/orders/state/{orderId}")
-	public ResponseEntity<String> updateOrderState(@PathVariable UUID orderId) throws Exception{
-		String updateResponseMessage = updateOrderStateServiceImpl.UpdateOrderState(orderId);
-		return ResponseEntity.ok(updateResponseMessage);
-	}*/
 }
