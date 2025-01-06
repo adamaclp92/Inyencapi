@@ -2,9 +2,7 @@ package com.example.inyencapi.inyencfalatok.controller;
 
 import com.example.inyencapi.inyencfalatok.dto.GetOrderByOrderIdResponseBodyDto;
 import com.example.inyencapi.inyencfalatok.dto.PostNewOrderResponseBodyDto;
-import com.example.inyencapi.inyencfalatok.exception.OrderNotFoundException;
 import com.example.inyencapi.inyencfalatok.kafka.OrderProducer;
-import com.example.inyencapi.inyencfalatok.service.GetOrderByOrderIdService;
 import com.example.inyencapi.inyencfalatok.service.GetOrderByOrderIdServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +22,7 @@ public class OrderController {
 
 	private final GetOrderByOrderIdServiceImpl getOrderByOrderIdService;
 
+
 	public OrderController(OrderProducer producer, GetOrderByOrderIdServiceImpl getOrderByOrderIdService) {
 		this.orderGwProducer = producer;
         this.getOrderByOrderIdService = getOrderByOrderIdService;
@@ -33,13 +32,17 @@ public class OrderController {
 	public ResponseEntity<PostNewOrderResponseBodyDto> postNewOrder(@RequestBody @Valid PostNewOrderRequestBodyDto body) throws Exception{
 		PostNewOrderResponseBodyDto postNewOrderResponseBodyDto =  orderGwProducer.postNewOrderRequest(body);
 		return ResponseEntity.ok(postNewOrderResponseBodyDto);
-
 	}
 
 	@GetMapping("/orders/{orderId}")
 	public ResponseEntity<GetOrderByOrderIdResponseBodyDto> getOrderByOrderId(@PathVariable UUID orderId) throws Exception {
 		GetOrderByOrderIdResponseBodyDto getOrderByOrderIdResponseBodyDto =  getOrderByOrderIdService.GetResponseBodyDto(orderId);
-
 		return ResponseEntity.ok(getOrderByOrderIdResponseBodyDto);
 	}
+
+	/*@PutMapping("/orders/state/{orderId}")
+	public ResponseEntity<String> updateOrderState(@PathVariable UUID orderId) throws Exception{
+		String updateResponseMessage = updateOrderStateServiceImpl.UpdateOrderState(orderId);
+		return ResponseEntity.ok(updateResponseMessage);
+	}*/
 }
